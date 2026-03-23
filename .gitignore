@@ -6,6 +6,9 @@ build/
 # Dependencies
 node_modules/
 
+# us-atlas is bundled into public/ at install time, don't ignore it
+# (public/counties-10m.json is intentionally committed)
+
 # Environment
 .env
 .env.local

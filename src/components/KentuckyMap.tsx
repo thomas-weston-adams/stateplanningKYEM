@@ -31,8 +31,8 @@ export default function KentuckyMap({
     const handler = (e: MouseEvent) => {
       mouseDownPos.current = { x: e.clientX, y: e.clientY };
     };
-    window.addEventListener("mousedown", handler);
-    return () => window.removeEventListener("mousedown", handler);
+    window.addEventListener("mousedown", handler, true);
+    return () => window.removeEventListener("mousedown", handler, true);
   }, []);
 
   const [tooltip, setTooltip] = useState<{

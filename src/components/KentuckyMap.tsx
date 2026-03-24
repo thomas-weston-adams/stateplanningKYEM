@@ -11,7 +11,7 @@ import { useState, useCallback } from "react";
 import { MAP_COLORS, COUNTIES_BY_FIPS, STATUS_META } from "@/data/counties";
 import type { County } from "@/types";
 
-const GEO_URL = "/counties-10m.json";
+const GEO_URL = "/stateplanningKYEM/counties-10m.json";
 
 interface KentuckyMapProps {
   selectedFips: string | null;

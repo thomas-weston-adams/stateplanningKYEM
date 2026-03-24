@@ -90,7 +90,7 @@ export default function Home() {
 
   const handleCountySelect = useCallback((county: County) => {
     setSelectedCounty(county);
-    setSearchQuery(county.name);
+    setSearchQuery("");
     setShowResults(false);
   }, []);
 

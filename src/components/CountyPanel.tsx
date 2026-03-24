@@ -139,6 +139,12 @@ export default function CountyPanel({ county, onClose }: CountyPanelProps) {
   }
 
   const overallMeta = STATUS_META[county.status];
+  const countyStaff = staff[county.name.toLowerCase()] ?? [];
+  const director = countyStaff.find(
+    (m) =>
+      m.position.toLowerCase().includes("director") &&
+      !m.position.toLowerCase().includes("deputy")
+  ) ?? null;
 
   return (
     <div className="h-full flex flex-col">
@@ -178,26 +184,45 @@ export default function CountyPanel({ county, onClose }: CountyPanelProps) {
           >
             Emergency Management Director
           </h3>
-          <div className="bg-slate-50 rounded-lg border border-slate-200 p-3">
-            <p className="font-semibold text-slate-800">{county.director.name}</p>
-            <p className="text-xs text-slate-500 mb-2">{county.director.title}</p>
-            <div className="space-y-1">
-              <a
-                href={`tel:${county.director.phone}`}
-                className="flex items-center gap-2 text-sm text-slate-700 hover:text-blue-700 group"
-              >
-                <Phone className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500" />
-                {county.director.phone}
-              </a>
-              <a
-                href={`mailto:${county.director.email}`}
-                className="flex items-center gap-2 text-sm text-slate-700 hover:text-blue-700 group truncate"
-              >
-                <Mail className="w-3.5 h-3.5 flex-shrink-0 text-slate-400 group-hover:text-blue-500" />
-                <span className="truncate">{county.director.email}</span>
-              </a>
+          {loading ? (
+            <p className="text-xs text-slate-400 italic">Loading…</p>
+          ) : director ? (
+            <div className="bg-slate-50 rounded-lg border border-slate-200 p-3">
+              <p className="font-semibold text-slate-800">{director.name}</p>
+              <p className="text-xs text-slate-500 mb-2">{director.position}</p>
+              <div className="space-y-1">
+                {director.officePhone && director.officePhone !== "N/A" && (
+                  <a
+                    href={`tel:${director.officePhone}`}
+                    className="flex items-center gap-2 text-sm text-slate-700 hover:text-blue-700 group"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500" />
+                    {director.officePhone} <span className="text-xs text-slate-400">office</span>
+                  </a>
+                )}
+                {director.cellPhone && director.cellPhone !== "N/A" && (
+                  <a
+                    href={`tel:${director.cellPhone}`}
+                    className="flex items-center gap-2 text-sm text-slate-700 hover:text-blue-700 group"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500" />
+                    {director.cellPhone} <span className="text-xs text-slate-400">cell</span>
+                  </a>
+                )}
+                {director.email && (
+                  <a
+                    href={`mailto:${director.email}`}
+                    className="flex items-center gap-2 text-sm text-slate-700 hover:text-blue-700 group truncate"
+                  >
+                    <Mail className="w-3.5 h-3.5 flex-shrink-0 text-slate-400 group-hover:text-blue-500" />
+                    <span className="truncate">{director.email}</span>
+                  </a>
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            <p className="text-xs text-slate-400 italic">No director on file.</p>
+          )}
         </section>
 
         {/* Last Communication */}
@@ -242,13 +267,15 @@ export default function CountyPanel({ county, onClose }: CountyPanelProps) {
           {loading ? (
             <p className="text-xs text-slate-400 italic">Loading staff…</p>
           ) : (() => {
-            const countyStaff = staff[county.name.toLowerCase()] ?? [];
-            if (countyStaff.length === 0) {
-              return <p className="text-xs text-slate-400 italic">No staff records on file.</p>;
+            const deputies = countyStaff.filter(
+              (m) => !(m.position.toLowerCase().includes("director") && !m.position.toLowerCase().includes("deputy"))
+            );
+            if (deputies.length === 0) {
+              return <p className="text-xs text-slate-400 italic">No additional staff on file.</p>;
             }
             return (
               <div>
-                {countyStaff.map((m, i) => (
+                {deputies.map((m, i) => (
                   <StaffCard key={i} member={m} />
                 ))}
               </div>

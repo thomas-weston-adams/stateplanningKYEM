@@ -7,7 +7,7 @@ import {
   ZoomableGroup,
   type Geography as GeoType,
 } from "react-simple-maps";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { MAP_COLORS, COUNTIES_BY_FIPS, STATUS_META } from "@/data/counties";
 import type { County } from "@/types";
 
@@ -25,6 +25,15 @@ export default function KentuckyMap({
   onCountySelect,
 }: KentuckyMapProps) {
   const mouseDownPos = useRef<{ x: number; y: number } | null>(null);
+
+  // Track mousedown via window so ZoomableGroup can't swallow it
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      mouseDownPos.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener("mousedown", handler);
+    return () => window.removeEventListener("mousedown", handler);
+  }, []);
 
   const [tooltip, setTooltip] = useState<{
     name: string;
@@ -81,7 +90,6 @@ export default function KentuckyMap({
   return (
     <div
       className="relative w-full h-full bg-slate-100 rounded-lg overflow-hidden"
-      onMouseDown={(e) => { mouseDownPos.current = { x: e.clientX, y: e.clientY }; }}
     >
       <ComposableMap
         projection="geoAlbersUsa"

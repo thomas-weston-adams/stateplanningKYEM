@@ -1,8 +1,9 @@
 "use client";
 
-import { X, Phone, Mail, Calendar, FileText, CheckCircle2, Clock, AlertTriangle, XCircle } from "lucide-react";
+import { X, Phone, Mail, Calendar, FileText, CheckCircle2, Clock, AlertTriangle, XCircle, Users } from "lucide-react";
 import type { County, PlanStatus, CountyPlan } from "@/types";
 import { STATUS_META } from "@/data/counties";
+import { useStaffData, type StaffMember } from "@/hooks/useStaffData";
 
 interface CountyPanelProps {
   county: County | null;
@@ -76,7 +77,53 @@ function PlanRow({ plan }: { plan: CountyPlan }) {
   );
 }
 
+function StaffCard({ member }: { member: StaffMember }) {
+  const isDirector =
+    member.position.toLowerCase().includes("director") &&
+    !member.position.toLowerCase().includes("deputy");
+  return (
+    <div className={`rounded-lg border p-3 mb-2 ${isDirector ? "border-blue-200 bg-blue-50" : "border-slate-200 bg-slate-50"}`}>
+      <p className="font-semibold text-slate-800 text-sm">{member.name}</p>
+      {member.position && (
+        <p className={`text-xs mb-1.5 ${isDirector ? "text-blue-700 font-medium" : "text-slate-500"}`}>
+          {member.position}
+        </p>
+      )}
+      <div className="space-y-1">
+        {member.officePhone && member.officePhone !== "N/A" && (
+          <a
+            href={`tel:${member.officePhone}`}
+            className="flex items-center gap-2 text-xs text-slate-700 hover:text-blue-700 group"
+          >
+            <Phone className="w-3 h-3 text-slate-400 group-hover:text-blue-500 flex-shrink-0" />
+            <span>{member.officePhone} <span className="text-slate-400">office</span></span>
+          </a>
+        )}
+        {member.cellPhone && member.cellPhone !== "N/A" && (
+          <a
+            href={`tel:${member.cellPhone}`}
+            className="flex items-center gap-2 text-xs text-slate-700 hover:text-blue-700 group"
+          >
+            <Phone className="w-3 h-3 text-slate-400 group-hover:text-blue-500 flex-shrink-0" />
+            <span>{member.cellPhone} <span className="text-slate-400">cell</span></span>
+          </a>
+        )}
+        {member.email && (
+          <a
+            href={`mailto:${member.email}`}
+            className="flex items-center gap-2 text-xs text-slate-700 hover:text-blue-700 group truncate"
+          >
+            <Mail className="w-3 h-3 flex-shrink-0 text-slate-400 group-hover:text-blue-500" />
+            <span className="truncate">{member.email}</span>
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function CountyPanel({ county, onClose }: CountyPanelProps) {
+  const { staff, loading } = useStaffData();
   if (!county) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-center p-8 text-slate-400">
@@ -181,6 +228,32 @@ export default function CountyPanel({ county, onClose }: CountyPanelProps) {
               <PlanRow key={plan.type} plan={plan} />
             ))}
           </div>
+        </section>
+
+        {/* Staff Directory */}
+        <section aria-labelledby="staff-heading">
+          <h3
+            id="staff-heading"
+            className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5"
+          >
+            <Users className="w-3.5 h-3.5" />
+            County Staff Directory
+          </h3>
+          {loading ? (
+            <p className="text-xs text-slate-400 italic">Loading staff…</p>
+          ) : (() => {
+            const countyStaff = staff[county.name.toLowerCase()] ?? [];
+            if (countyStaff.length === 0) {
+              return <p className="text-xs text-slate-400 italic">No staff records on file.</p>;
+            }
+            return (
+              <div>
+                {countyStaff.map((m, i) => (
+                  <StaffCard key={i} member={m} />
+                ))}
+              </div>
+            );
+          })()}
         </section>
 
         {/* FIPS Reference */}

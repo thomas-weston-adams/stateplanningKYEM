@@ -87,7 +87,7 @@ export default function KentuckyMap({
         style={{ width: "100%", height: "100%" }}
       >
         <ZoomableGroup
-          center={[0, 0]}
+          center={[-85.6, 37.6]}
           zoom={1}
           minZoom={1}
           maxZoom={8}

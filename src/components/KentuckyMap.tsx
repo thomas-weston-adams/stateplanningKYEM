@@ -7,7 +7,7 @@ import {
   ZoomableGroup,
   type Geography as GeoType,
 } from "react-simple-maps";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { MAP_COLORS, COUNTIES_BY_FIPS, STATUS_META } from "@/data/counties";
 import type { County } from "@/types";
 
@@ -24,6 +24,8 @@ export default function KentuckyMap({
   highlightedFips,
   onCountySelect,
 }: KentuckyMapProps) {
+  const mouseDownPos = useRef<{ x: number; y: number } | null>(null);
+
   const [tooltip, setTooltip] = useState<{
     name: string;
     status: string;
@@ -77,7 +79,10 @@ export default function KentuckyMap({
   };
 
   return (
-    <div className="relative w-full h-full bg-slate-100 rounded-lg overflow-hidden">
+    <div
+      className="relative w-full h-full bg-slate-100 rounded-lg overflow-hidden"
+      onMouseDown={(e) => { mouseDownPos.current = { x: e.clientX, y: e.clientY }; }}
+    >
       <ComposableMap
         projection="geoAlbersUsa"
         projectionConfig={{
@@ -110,7 +115,14 @@ export default function KentuckyMap({
                       tabIndex={0}
                       role="button"
                       aria-label={`${county.name} County – ${STATUS_META[county.status].label}`}
-                      onClick={() => onCountySelect(county)}
+                      onClick={(e: React.MouseEvent<SVGPathElement>) => {
+                        const down = mouseDownPos.current;
+                        if (!down) return;
+                        const dx = e.clientX - down.x;
+                        const dy = e.clientY - down.y;
+                        if (Math.sqrt(dx * dx + dy * dy) > 4) return; // was a drag
+                        onCountySelect(county);
+                      }}
                       onMouseMove={(evt: React.MouseEvent<SVGPathElement>) => handleMouseMove(county, evt)}
                       onMouseLeave={handleMouseLeave}
                       onKeyDown={(e: React.KeyboardEvent<SVGPathElement>) => {

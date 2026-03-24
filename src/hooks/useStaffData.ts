@@ -63,7 +63,7 @@ function sortStaff(a: StaffMember, b: StaffMember): number {
 let cache: StaffByCounty | null = null;
 let pending: Promise<StaffByCounty> | null = null;
 
-const CSV_URL = "/stateplanningKYEM/staff%20list%20county%20leadership%20EMA.csv";
+const CSV_URL = "/stateplanningKYEM/staff-ema.csv";
 
 async function loadStaff(): Promise<StaffByCounty> {
   if (cache) return cache;
@@ -122,10 +122,15 @@ export function useStaffData(): { staff: StaffByCounty; loading: boolean } {
       setLoading(false);
       return;
     }
-    loadStaff().then((data) => {
-      setStaff(data);
-      setLoading(false);
-    });
+    loadStaff()
+      .then((data) => {
+        setStaff(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load staff data:", err);
+        setLoading(false);
+      });
   }, []);
 
   return { staff, loading };
